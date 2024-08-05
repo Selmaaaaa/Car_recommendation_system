@@ -1,0 +1,33 @@
+
+
+4- @ip , masque , la durée de bail 
+
+5-
+
+7- probleme dans le fichier de configuration : adresse ip ironnée ,
+ le nom ne pointe pas sur l'adresse ip
+
+les clients n'autorisent pas les mise à jours dynamique 
+
+8- créer une plge d'exclusion !! 
+
+9- 
+
+10- cache : mémoire temporaire qui contient les résolutions récemment résolu 
+
+
+le protocole qui permet d'interroger et mettre à jour 
+
+
+
+
+
+
+structure logique et physique 
+
+quel est l'objet : cc'ets un compostant logique 
+unité d'organisation ( ou on stocke) ,
+elle est dans un domain qui de son tour est dans une arborescence
+
+controleur de domaine : ou on installe l'active directory 
+service d'annuaire : active directory  toutes les ressources doivent 'etre dans une base de dinnées acommpagné de leur dérails 

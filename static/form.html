@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Scan Tool</title>
+</head>
+<body>
+    <h1>Upload a File for Scanning</h1>
+    <form action="/scan" method="post" enctype="multipart/form-data">
+        <label for="file">Select file to upload:</label>
+        <input type="file" id="file" name="file" required>
+        <button type="submit">Upload and Scan</button>
+    </form>
+    <hr>
+    <div id="results"></div>
+
+    <script>
+        const form = document.querySelector('form');
+        const resultsDiv = document.getElementById('results');
+
+        form.addEventListener('submit', async (event) => {
+    event.preventDefault(); // Prevent the default form submission
+
+    const formData = new FormData(form);
+
+    try {
+        const response = await fetch('/scan', {
+            method: 'POST',
+            body: formData
+        });
+
+        // Check if response is JSON
+        const contentType = response.headers.get('Content-Type');
+        if (contentType && contentType.includes('application/json')) {
+            const result = await response.json();
+            resultsDiv.innerHTML = `
+                <h2>${response.ok ? 'Scan Results:' : 'Error:'}</h2>
+                <pre>${JSON.stringify(result, null, 2)}</pre>
+            `;
+        } else {
+            resultsDiv.innerHTML = `<h2>Unexpected Response:</h2><pre>${await response.text()}</pre>`;
+        }
+    } catch (error) {
+        resultsDiv.innerHTML = `<h2>Exception Occurred:</h2><pre>${error.message}</pre>`;
+    }
+});
+
+    </script>
+</body>
+</html>

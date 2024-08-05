@@ -1,0 +1,63 @@
+big data =
+
+traitement d'une vaste quantité de données variées 
+
+donn"es
+soit : en mouvement
+change avec le temps 
+en repos
+stagné 
+
+5 caractéristique
+
+vélocité vitesse du traitement des données
+
+volume la taille des données traitées
+véracité 
+variété diversité des données structurées 
+valeur
+
+
+////
+HADOOP est le logiciel ou on pratique la big data
+c'est un eco systeme qui stocke et traite la masse de données
+
+il a 3 composantes : 
+
+1/HDFS
+
+2/YARN/MAPREDUCE
+
+
+HDFS : permet le stockage des données à traiter
+
+se constitue des data nodes + name node 
+
+le name node il contient la map des données ( le nom , la localisation) , il gere l'espace nom du fichier à l'aide de ces méta données
+
+FS image = contient les métadonnées , il est chargé pendant le démarrage 
+Log file = c'est un journal de modification apportés au métadonnées 
+
+data node =
+gere le stockage read / write 
+il garde des copies des données dans d'autre noeuds pour éviter les catastrophes au cas des pannes 	
+LE NBR DE copies est par défaut 3 
+il envoit un signal heartbeat au name node pour lui décrire son statut 
+
+au cas d'une panne d'un datanode le name node ne recevra pluus de heart beat signals 
+
+
+si le name node tombe en panne un secondary name node va le remplacer , sachant que le name node lui envoit ces 2 fichiers FS IMAGE ET LOG file 
+
+
+high availability NAMENODE
+
+
+name node actif : 
+en cours de service , il gere la totalité des opérations liées au métadonnées 
+
+passif:
+en arrêt , en attente , prêt à prendre la main en cas de défaillance
+
+
+journal node,

@@ -1,0 +1,101 @@
+from flask import Flask, request, jsonify, render_template_string
+import subprocess
+import os
+
+app = Flask(__name__)
+
+app.config['UPLOAD_FOLDER'] = 'uploads'
+os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+
+def scan_for_malware(file_path):
+    try:
+        # Run the ClamAV scan command
+        result = subprocess.run(['clamscan', file_path], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        return result.stdout
+    except Exception as e:
+        return str(e)
+
+# Define the HTML content directly in the script
+html_content = """
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Scan Tool</title>
+</head>
+<body>
+    <h1>Upload a File for Scanning</h1>
+    <form action="/scan" method="post" enctype="multipart/form-data">
+        <label for="file">Select file to upload:</label>
+        <input type="file" id="file" name="file" required>
+        <button type="submit">Upload and Scan</button>
+    </form>
+    <hr>
+    <div id="results"></div>
+
+    <script>
+        const form = document.querySelector('form');
+        const resultsDiv = document.getElementById('results');
+
+        form.addEventListener('submit', async (event) => {
+            event.preventDefault(); // Prevent the form from submitting the default way
+
+            const formData = new FormData(form);
+
+            try {
+                const response = await fetch('/scan', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    resultsDiv.innerHTML = `
+                        <h2>Scan Results:</h2>
+                        <pre>${JSON.stringify(result, null, 2)}</pre>
+                    `;
+                } else {
+                    resultsDiv.innerHTML = `<h2>Error:</h2><pre>${response.statusText}</pre>`;
+                }
+            } catch (error) {
+                resultsDiv.innerHTML = `<h2>Exception Occurred:</h2><pre>${error.message}</pre>`;
+            }
+        });
+    </script>
+</body>
+</html>
+"""
+
+@app.route('/')
+def index():
+    return render_template_string(html_content)
+
+@app.route('/scan', methods=['POST'])
+def scan():
+    try:
+        if 'file' not in request.files:
+            return jsonify({'error': 'No file part'}), 400
+        
+        file = request.files['file']
+        if file.filename == '':
+            return jsonify({'error': 'No selected file'}), 400
+        
+        if file:
+            file_path = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
+            file.save(file_path)
+            
+            # Perform malware scan
+            scan_results = scan_for_malware(file_path)
+            
+            # Parse the scan results
+            results = {'scan_results': scan_results}
+            
+            return jsonify(results)
+        else:
+            return jsonify({'error': 'File not provided'}), 400
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+if __name__ == '__main__':
+    app.run(debug=True)

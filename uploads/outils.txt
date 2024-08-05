@@ -1,0 +1,2 @@
+Nessus : Un scanner de vulnérabilités qui peut également évaluer les risques liés à votre infrastructure cloud.
+Cloud Security Posture Management (CSPM) : Des outils comme Prisma Cloud ou CloudHealth offrent des capacités d'analyse et de gestion des risques spécifiques au cloud.
