@@ -11,9 +11,18 @@ os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 def scan_for_malware(file_path):
     try:
         result = subprocess.run(['clamscan', file_path], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-        return result.stdout
+        if result.returncode == 0:
+            return {"status": "Clean", "details": result.stdout.strip()}
+        elif result.returncode == 1:
+            infected_files = []
+            for line in result.stdout.splitlines():
+                if "FOUND" in line:
+                    infected_files.append(line.strip())
+            return {"status": "Infected", "infected_files": infected_files}
+        else:
+            return {"status": "Error", "details": result.stderr.strip()}
     except Exception as e:
-        return str(e)
+        return {"status": "Error", "details": str(e)}
 
 def detect_sensitive_data(file_path):
     with open(file_path, 'r', errors='ignore') as file:
@@ -73,7 +82,6 @@ def index():
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>File Analysis Tool</title>
     <style>
-        /* Basic loading spinner styles */
         .spinner {
             display: none;
             width: 40px;
@@ -87,6 +95,24 @@ def index():
         
         @keyframes spin {
             to { transform: rotate(360deg); }
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        table, th, td {
+            border: 1px solid black;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
         }
     </style>
 </head>
@@ -107,11 +133,10 @@ def index():
         const spinner = document.getElementById('spinner');
 
         form.addEventListener('submit', async (event) => {
-            event.preventDefault(); // Prevent the form from submitting the default way
+            event.preventDefault();
 
             const formData = new FormData(form);
 
-            // Show the spinner while the request is being processed
             spinner.style.display = 'block';
             resultsDiv.innerHTML = '';
 
@@ -121,15 +146,11 @@ def index():
                     body: formData
                 });
 
-                // Hide the spinner once the request is complete
                 spinner.style.display = 'none';
 
                 if (response.ok) {
                     const result = await response.json();
-                    resultsDiv.innerHTML = `
-                        <h2>Analysis Results:</h2>
-                        <pre>${JSON.stringify(result, null, 2)}</pre>
-                    `;
+                    resultsDiv.innerHTML = formatResults(result);
                 } else {
                     resultsDiv.innerHTML = `<h2>Error:</h2><pre>${JSON.stringify(await response.json(), null, 2)}</pre>`;
                 }
@@ -138,11 +159,52 @@ def index():
                 resultsDiv.innerHTML = `<h2>Exception Occurred:</h2><pre>${error.message}</pre>`;
             }
         });
+
+        function formatResults(result) {
+            let html = "<h2>Analysis Results:</h2>";
+
+            if (result.scan_results) {
+                html += "<h3>ClamAV Scan Results</h3>";
+                html += `<p>Status: ${result.scan_results.status}</p>`;
+                html += `<pre>${result.scan_results.details}</pre>`;
+            }
+
+            if (result.file_permissions) {
+                html += "<h3>File Permissions</h3>";
+                html += `<table>
+                            <tr><th>Readable by Others</th><td>${result.file_permissions.readable_by_others}</td></tr>
+                            <tr><th>Writable by Others</th><td>${result.file_permissions.writable_by_others}</td></tr>
+                         </table>`;
+            }
+
+            if (Object.keys(result.hard_coded_credentials).length > 0) {
+                html += "<h3>Hard-Coded Credentials</h3>";
+                html += `<table><tr><th>Type</th><th>Matches</th></tr>`;
+                for (const [key, matches] of Object.entries(result.hard_coded_credentials)) {
+                    html += `<tr><td>${key}</td><td><pre>${matches.join('<br>')}</pre></td></tr>`;
+                }
+                html += `</table>`;
+            } else {
+                html += "<h3>Hard-Coded Credentials</h3><p>No hard-coded credentials found.</p>";
+            }
+
+            if (Object.keys(result.sensitive_data).length > 0) {
+                html += "<h3>Sensitive Data</h3>";
+                html += `<table><tr><th>Type</th><th>Matches</th></tr>`;
+                for (const [key, matches] of Object.entries(result.sensitive_data)) {
+                    html += `<tr><td>${key}</td><td><pre>${matches.join('<br>')}</pre></td></tr>`;
+                }
+                html += `</table>`;
+            } else {
+                html += "<h3>Sensitive Data</h3><p>No sensitive data found.</p>";
+            }
+
+            return html;
+        }
     </script>
 </body>
 </html>
 """)
-
 
 @app.route('/scan', methods=['POST'])
 def scan():
