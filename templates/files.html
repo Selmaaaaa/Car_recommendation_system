@@ -1,186 +1,195 @@
- <!DOCTYPE html>
-    <html lang="en">
-    <head>
-        <meta charset="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-        <meta name="description" content="" />
-        <meta name="author" content="" />
-        <title>One Page Wonder - Start Bootstrap Template</title>
-        <link rel="icon" type="image/x-icon" href="assets/favicon.ico" />
-        <!-- Font Awesome icons (free version)-->
-        <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
-        <!-- Google fonts-->
-        <link href="https://fonts.googleapis.com/css?family=Catamaran:100,200,300,400,500,600,700,800,900" rel="stylesheet" />
-        <link href="https://fonts.googleapis.com/css?family=Lato:100,100i,300,300i,400,400i,700,700i,900,900i" rel="stylesheet" />
-        <!-- Core theme CSS (includes Bootstrap)-->
-        <link href="./css/styles.css" rel="stylesheet" />
-        
-        <style>
-            .spinner {
-                display: none;
-                width: 40px;
-                height: 40px;
-                border: 4px solid rgba(0, 0, 0, 0.1);
-                border-radius: 50%;
-                border-top-color: #333;
-                animation: spin 1s ease-in-out infinite;
-                margin: 20px auto;
-            }
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <meta name="description" content="" />
+    <meta name="author" content="" />
+    <title>Analysis Tool For Your Cloud Migrations</title>
+    <link rel="icon" type="image/x-icon" href="assets/favicon.ico" />
+    <!-- Font Awesome icons (free version)-->
+    <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
+    <!-- Google fonts-->
+    <link href="https://fonts.googleapis.com/css?family=Catamaran:100,200,300,400,500,600,700,800,900" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css?family=Lato:100,100i,300,300i,400,400i,700,700i,900,900i" rel="stylesheet" />
+    <!-- Core theme CSS (includes Bootstrap)-->
+    <link href="./css/styles.css" rel="stylesheet" />
+    
+    <style>
+        .spinner {
+            display: none;
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-radius: 50%;
+            border-top-color: #333;
+            animation: spin 1s ease-in-out infinite;
+            margin: 20px auto;
+        }
 
-            @keyframes spin {
-                to { transform: rotate(360deg); }
-            }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
 
-            table {
-                width: 100%;
-                border-collapse: collapse;
-            }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
 
-            table, th, td {
-                border: 1px solid black;
-            }
+        table, th, td {
+            border: 1px solid black;
+        }
 
-            th, td {
-                padding: 10px;
-                text-align: left;
-            }
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
 
-            th {
-                background-color: #f2f2f2;
-            }
-        </style>
-    </head>
-    <body id="page-top">
-        <!-- Navigation-->
-        <nav class="navbar navbar-expand-lg navbar-dark navbar-custom fixed-top">
-            <div class="container px-5">
-                <a class="navbar-brand" href="#page-top">Analysis Tool For Your Cloud Migrations</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
-                <div class="collapse navbar-collapse" id="navbarResponsive">
-                    <ul class="navbar-nav ms-auto">
-                        <li class="nav-item"><a class="nav-link" href="signup.html">First name</a></li>
-                        <li class="nav-item"><a class="nav-link" href="login.html">Last name</a></li>
-                    </ul>
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body id="page-top">
+    <!-- Navigation-->
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-custom fixed-top">
+        <div class="container px-5">
+            {% if user.is_authenticated %}
+            <a class="navbar-brand" href="#page-top">{{ 'Hello ' + user.first_name + ' ' + user.last_name }}</a>
+            {% else %} 
+            <a class="navbar-brand" href="#page-top">Analysis Tool For Your Cloud Migrations</a>
+            {% endif %}
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarResponsive">
+                <ul class="navbar-nav ms-auto">
+                    {% if user.is_authenticated %}
+                        
+                        <li class="nav-item"><a class="nav-link" href="{{ url_for('logout') }}">Logout</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{{ url_for('reports') }}">Reports</a></li>
+                    {% else %}
+                        <li class="nav-item"><a class="nav-link" href="{{ url_for('signup') }}">Signup</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{{ url_for('login') }}">Login</a></li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+    <!-- Header-->
+    <header class="masthead text-center text-white">
+        <div class="masthead-content">
+            <div class="container px-5 d-flex flex-column align-items-center">
+                <h1>Upload an XML/TXT/CSV File for Analysis</h1>
+                <div style="padding: 3em; border: 2px dotted #000; border-radius: 5px; background-color: #f9f9f9; color: black; margin-top: 3em;">
+                    <form id="uploadForm" method="post" enctype="multipart/form-data" class="mt-4" style="display: flex; flex-direction: column; align-items: flex-end;">
+                        <div style="display: flex; justify-content: flex-end; width: 100%; margin-bottom: 7px;">
+                            <label for="file" style="margin-right: 10px;">Select file to upload:</label>
+                            <input type="file" id="file" name="file" accept=".json,.xml,.txt,.csv" required>
+                        </div>
+                        <button data-mdb-button-init data-mdb-ripple-init class="btn btn-primary btn-lg btn-block" type="button" id="uploadBtn" style="margin-top: 2em;" >Upload and Analyze</button>
+                    </form>
+
                 </div>
+                <div class="spinner" id="spinner"></div>
+                <hr>
             </div>
-        </nav>
-        <!-- Header-->
-        <header class="masthead text-center text-white">
-            <div class="masthead-content">
-                <div class="container px-5 d-flex flex-column align-items-center">
-                    <h1>Upload a File for Analysis</h1>
-            
-                    <div style="padding: 20px; border: 2px dotted #000; border-radius: 5px; background-color: #f9f9f9; color: black;">
-                        <form action="/scan" method="post" enctype="multipart/form-data" class="mt-4" style="display: flex; flex-direction: column; align-items: flex-end;">
-                            <div style="display: flex; justify-content: flex-end; width: 100%; margin-bottom: 15px;">
-                                <label for="file" style="margin-right: 10px;">Select file to upload:</label>
-                                <input type="file" id="file" name="file" required>
-                            </div>
-                            <button type="submit" style="margin-top: 10px;">Upload and Analyze</button>
-                        </form>
-                    </div>
-                    
-                    <div class="spinner" id="spinner"></div>
-                    <hr>
-                </div>
-            </div>
-            
-            </div>
-            <div class="bg-circle-1 bg-circle"></div>
-            <div class="bg-circle-2 bg-circle"></div>
-            <div class="bg-circle-3 bg-circle"></div>
-            <div class="bg-circle-4 bg-circle"></div>
-        </header>
-        <!-- Content section 1-->
-        <section id="scroll" class="d-flex justify-content-center align-items-center">
-            <div id="results"></div>
-        </section>
-        
-        <!-- Footer-->
-        <footer class="py-5 bg-black">
-            <div class="container px-5"><p class="m-0 text-center text-white small">Copyright &copy; Your Website 2023</p></div>
-        </footer>
-        <!-- Bootstrap core JS-->
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
-        <!-- Core theme JS-->
-        <script src="/js/scripts.js"></script>
-        <script>
-            const form = document.querySelector('form');
-            const resultsDiv = document.getElementById('results');
-            const spinner = document.getElementById('spinner');
+        </div>
+        <div class="bg-circle-1 bg-circle"></div>
+        <div class="bg-circle-2 bg-circle"></div>
+        <div class="bg-circle-3 bg-circle"></div>
+        <div class="bg-circle-4 bg-circle"></div>
+    </header>
+    <!-- Content section 1-->
+    <section id="scroll" class="d-flex justify-content-center align-items-center">
+        <div id="results"></div>
+    </section>
+    
+    <!-- Footer-->
+    <footer class="py-5 bg-black">
+        <div class="container px-5"><p class="m-0 text-center text-white small">Copyright &copy; Your Website 2023</p></div>
+    </footer>
+    <!-- Bootstrap core JS-->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Core theme JS-->
+    <script src="/js/scripts.js"></script>
+    <script>
+        const form = document.getElementById('uploadForm');
+        const resultsDiv = document.getElementById('results');
+        const spinner = document.getElementById('spinner');
 
-            form.addEventListener('submit', async (event) => {
-                event.preventDefault();
+        document.getElementById('uploadBtn').addEventListener('click', async (event) => {
+            event.preventDefault();
 
-                const formData = new FormData(form);
+            const formData = new FormData(form);
 
-                spinner.style.display = 'block';
-                resultsDiv.innerHTML = '';
+            spinner.style.display = 'block';
+            resultsDiv.innerHTML = '';
 
-                try {
-                    const response = await fetch('/scan', {
-                        method: 'POST',
-                        body: formData
-                    });
+            try {
+                const response = await fetch('/files_scan', {
+                    method: 'POST',
+                    body: formData
+                });
 
-                    spinner.style.display = 'none';
+                spinner.style.display = 'none';
 
-                    if (response.ok) {
-                        const result = await response.json();
-                        resultsDiv.innerHTML = formatResults(result);
-                    } else {
-                        resultsDiv.innerHTML = `<h2>Error:</h2><pre>${JSON.stringify(await response.json(), null, 2)}</pre>`;
-                    }
-                } catch (error) {
-                    spinner.style.display = 'none';
-                    resultsDiv.innerHTML = `<h2>Exception Occurred:</h2><pre>${error.message}</pre>`;
-                }
-            });
-
-            function formatResults(result) {
-                let html = "<h2>Analysis Results:</h2>";
-
-                if (result.scan_results) {
-                    html += "<h3>ClamAV Scan Results</h3>";
-                    html += `<p>Status: ${result.scan_results.status}</p>`;
-                    html += `<pre>${result.scan_results.details}</pre>`;
-                }
-
-                if (result.file_permissions) {
-                    html += "<h3>File Permissions</h3>";
-                    html += `<table>
-                                <tr><th>Readable by Others</th><td>${result.file_permissions.readable_by_others}</td></tr>
-                                <tr><th>Writable by Others</th><td>${result.file_permissions.writable_by_others}</td></tr>
-                             </table>`;
-                }
-
-                if (Object.keys(result.hard_coded_credentials).length > 0) {
-                    html += "<h3>Hard-Coded Credentials</h3>";
-                    html += `<table><tr><th>Type</th><th>Matches</th></tr>`;
-                    for (const [key, matches] of Object.entries(result.hard_coded_credentials)) {
-                        html += `<tr><td>${key}</td><td><pre>${matches.join('<br>')}</pre></td></tr>`;
-                    }
-                    html += `</table>`;
+                if (response.ok) {
+                    const result = await response.json();
+                    resultsDiv.innerHTML = formatResults(result);
                 } else {
-                    html += "<h3>Hard-Coded Credentials</h3><p>No hard-coded credentials found.</p>";
+                    resultsDiv.innerHTML = `<h2>Error:</h2><pre>${JSON.stringify(await response.json(), null, 2)}</pre>`;
                 }
-
-                if (Object.keys(result.sensitive_data).length > 0) {
-                    html += "<h3>Sensitive Data</h3>";
-                    html += `<table><tr><th>Type</th><th>Matches</th></tr>`;
-                    for (const [key, matches] of Object.entries(result.sensitive_data)) {
-                        html += `<tr><td>${key}</td><td><pre>${matches.join('<br>')}</pre></td></tr>`;
-                    }
-                    html += `</table>`;
-                } else {
-                    html += "<h3>Sensitive Data</h3><p>No sensitive data found.</p>";
-                }
-
-                html += `<h3>Risk Score: ${result.vulnerability_score}</h3>`;
-                html += `<h3>Risk Level: ${result.risk_level}</h3>`;
-
-                return html;
+            } catch (error) {
+                spinner.style.display = 'none';
+                resultsDiv.innerHTML = `<h2>Exception Occurred:</h2><pre>${error.message}</pre>`;
             }
-        </script>
-    </body>
-    </html>
+        });
+
+        function formatResults(result) {
+            let html = "<h2>Analysis Results:</h2>";
+
+            if (result.scan_results) {
+                html += "<h3>ClamAV Scan Results</h3>";
+                html += `<p>Status: ${result.scan_results.status}</p>`;
+                html += `<pre>${result.scan_results.details}</pre>`;
+            }
+
+            if (result.file_permissions) {
+                html += "<h3>File Permissions</h3>";
+                html += `<table>
+                            <tr><th>Readable by Others</th><td>${result.file_permissions.readable_by_others}</td></tr>
+                            <tr><th>Writable by Others</th><td>${result.file_permissions.writable_by_others}</td></tr>
+                         </table>`;
+            }
+
+            if (Object.keys(result.hard_coded_credentials).length > 0) {
+                html += "<h3>Hard-Coded Credentials</h3>";
+                html += `<table><tr><th>Type</th><th>Matches</th></tr>`;
+                for (const [key, matches] of Object.entries(result.hard_coded_credentials)) {
+                    html += `<tr><td>${key}</td><td><pre>${matches.join('<br>')}</pre></td></tr>`;
+                }
+                html += `</table>`;
+            } else {
+                html += "<h3>Hard-Coded Credentials</h3><p>No hard-coded credentials found.</p>";
+            }
+
+            if (Object.keys(result.sensitive_data).length > 0) {
+                html += "<h3>Sensitive Data</h3>";
+                html += `<table><tr><th>Type</th><th>Matches</th></tr>`;
+                for (const [key, matches] of Object.entries(result.sensitive_data)) {
+                    html += `<tr><td>${key}</td><td><pre>${matches.join('<br>')}</pre></td></tr>`;
+                }
+                html += `</table>`;
+            } else {
+                html += "<h3>Sensitive Data</h3><p>No sensitive data found.</p>";
+            }
+
+            html += `<h3>Risk Score: ${result.vulnerability_score}</h3>`;
+            html += `<h3>Risk Level: ${result.risk_level}</h3>`;
+
+            return html;
+        }
+    </script>
+</body>
+</html>
