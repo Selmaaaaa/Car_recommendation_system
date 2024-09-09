@@ -3,8 +3,8 @@ import io
 from flask import Flask, Response, jsonify, redirect, render_template, request, send_from_directory, url_for, make_response, flash
 from flask_login import LoginManager, UserMixin, login_user, login_required, current_user
 from flask_mysqldb import MySQL
-from files import detect_sensitive_data, check_hard_coded_credentials, check_file_permissions, calculate_vulnerability_score, determine_risk_level
-from bandit import run_bandit_analysis, scan_for_malware
+from files import detect_sensitive_data, check_hard_coded_credentials, check_file_permissions, calculate_vulnerability_score, determine_risk_level,scan_for_malware
+from bandit import run_bandit_analysis
 from flask import session
 from reportlab.lib.pagesizes import A4
 from reportlab.lib import colors
@@ -71,7 +71,8 @@ def generate_pdf_report(analysis_result, report_type):
         paragraph_style = styles['BodyText']
         paragraph_style.wordWrap = 'CJK'  # Ensure text wraps correctly
 
-        logo_path = '.\static\assets\img\PIC2.png'  # Update this path to your logo file
+        logo_path = r'.\static\assets\img\PIC2.png'  # Use raw string to handle backslashes
+  # Update this path to your logo file
         if os.path.exists(logo_path):
             logo = Image(logo_path, width=1.5 * inch, height=1 * inch)
             story.append(logo)
@@ -164,18 +165,51 @@ def generate_report():
     if not analysis_result:
         flash("No analysis result found", 'danger')
         return redirect(url_for('scanpage'))
-
     try:
         # Generate the PDF report using the analysis result
-        pdf = generate_pdf_report(analysis_result, filename)
-        response = make_response(pdf)
+        pdf_data = generate_pdf_report(analysis_result, filename)
+
+        # Save the PDF to a file
+        report_filename = f"{filename}_analysis_report.pdf"
+        report_path = os.path.join('reports', report_filename)
+        os.makedirs('reports', exist_ok=True)
+        with open(report_path, 'wb') as f:
+            f.write(pdf_data)
+
+        # Save report metadata to the database
+        cur = mysql.connection.cursor()
+        cur.execute(
+            "INSERT INTO reports (user_id, filename, created_at) VALUES (%s, %s, %s)",
+            (current_user.id, report_filename, datetime.now())
+        )
+        mysql.connection.commit()
+        cur.close()
+
+        # Return PDF file as a downloadable attachment
+        response = make_response(pdf_data)
         response.headers['Content-Type'] = 'application/pdf'
-        response.headers['Content-Disposition'] = f'attachment; filename={filename}_analysis_report.pdf'
+        response.headers['Content-Disposition'] = f'attachment; filename={report_filename}'
         return response
     except Exception as e:
         flash(f"An error occurred while generating the report: {str(e)}", 'danger')
         return redirect(url_for('scanpage'))
+    
+@app.route('/reports')
+@login_required
+def reports():
+    cur = mysql.connection.cursor()
+    cur.execute("SELECT filename, created_at FROM reports WHERE user_id = %s", (current_user.id,))
+    reports = cur.fetchall()
+    cur.close()
+    print(reports)  # Debugging line
+    return render_template('reports.html', reports=reports, user=current_user)
 
+
+
+@app.route('/download_report/<filename>')
+@login_required
+def download_report(filename):
+    return send_from_directory('reports', filename)
 
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
@@ -278,10 +312,6 @@ def serve_assets(filename):
 def index():
     return render_template('index.html')
 
-@app.route('/reports')
-@login_required
-def reports():
-    return render_template('reports.html')
 
 @app.route('/scanpage', methods=['GET', 'POST'])
 @login_required
@@ -334,12 +364,6 @@ def python_scan():
 
 def run_combined_analysis(file_path):
     issues = []
-    
-    sensitive_data_issues = detect_sensitive_data(file_path)
-    issues.extend(sensitive_data_issues)
-    
-    hard_coded_credentials_issues = check_hard_coded_credentials(file_path)
-    issues.extend(hard_coded_credentials_issues)
     
     bandit_issues = run_bandit_analysis(file_path)
     issues.extend(bandit_issues)

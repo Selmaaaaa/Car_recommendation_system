@@ -1,77 +1,7 @@
-from flask import Flask, request, render_template, send_from_directory
 import subprocess
-import tempfile
 import os
 import json
-import re
-
-app = Flask(__name__)
-
-@app.route('/')
-def index():
-    return render_template('python.html')
-
-@app.route('/css/<path:filename>')
-def serve_css(filename):
-    return send_from_directory('css', filename)
-
-@app.route('/js/<path:filename>')
-def serve_js(filename):
-    return send_from_directory('js', filename)
-
-@app.route('/upload', methods=['POST'])
-def upload_file():
-    if 'file' not in request.files:
-        return "No file part", 400
-    
-    file = request.files['file']
-    
-    if file.filename == '':
-        return "No selected file", 400
-
-    if file and file.filename.endswith('.py'):
-        with tempfile.NamedTemporaryFile(delete=False, suffix=".py") as temp_file:
-            file.save(temp_file.name)
-            temp_file_path = temp_file.name
-        
-        analysis_result = run_combined_analysis(temp_file_path)
-        os.remove(temp_file_path)
-        
-        return render_template('python.html', analysis_result=analysis_result)
-    
-    return "Invalid file type. Please upload a .py file.", 400
-
-
-def run_combined_analysis(file_path):
-    bandit_issues = run_bandit_analysis(file_path)
-    malware_scan = scan_for_malware(file_path)
-    sensitive_data = detect_sensitive_data(file_path)
-    hard_coded_credentials = check_hard_coded_credentials(file_path)
-    file_permissions = check_file_permissions(file_path)
-
-    severity_mapping = {'LOW': 1, 'MEDIUM': 2, 'HIGH': 3, 'CRITICAL': 4}
-
-    for issue in bandit_issues:
-        severity_score = severity_mapping.get(issue['severity'], 1)
-        if malware_scan['status'] == 'Infected':
-            severity_score += 2
-        if sensitive_data:
-            severity_score += 1
-        if hard_coded_credentials:
-            severity_score += 2
-        if file_permissions['writable_by_others']:
-            severity_score += 1
-        
-        if severity_score > 4:
-            issue['severity'] = 'CRITICAL'
-        elif severity_score == 4:
-            issue['severity'] = 'HIGH'
-        elif severity_score == 3:
-            issue['severity'] = 'MEDIUM'
-        else:
-            issue['severity'] = 'LOW'
-
-    return bandit_issues
+import argparse
 
 def run_bandit_analysis(file_path):
     try:
@@ -94,51 +24,29 @@ def run_bandit_analysis(file_path):
     except Exception as e:
         return [{"issue_text": str(e)}]
 
-def scan_for_malware(file_path):
-    try:
-        result = subprocess.run(['clamscan', file_path], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-        if result.returncode == 0:
-            return {"status": "Clean", "details": result.stdout.strip()}
-        elif result.returncode == 1:
-            infected_files = [line.strip() for line in result.stdout.splitlines() if "FOUND" in line]
-            return {"status": "Infected", "infected_files": infected_files}
-        else:
-            return {"status": "Error", "details": result.stderr.strip()}
-    except Exception as e:
-        return {"status": "Error", "details": str(e)}
+def main():
+    parser = argparse.ArgumentParser(description='Run security analysis on a Python file.')
+    parser.add_argument('file', help='Path to the Python file to analyze')
 
-def detect_sensitive_data(file_path):
-    with open(file_path, 'r', errors='ignore') as file:
-        content = file.read()
+    args = parser.parse_args()
 
-    patterns = {
-        'credit_card': r'\b(?:\d[ -]*?){13,16}\b',
-        'ssn': r'\b\d{3}-\d{2}-\d{4}\b',
-        'email': r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
-    }
+    file_path = args.file
 
-    findings = {key: re.findall(pattern, content) for key, pattern in patterns.items()}
-    return {k: v for k, v in findings.items() if v}
+    if not os.path.isfile(file_path):
+        print(f"File {file_path} does not exist.")
+        return
 
-def check_hard_coded_credentials(file_path):
-    with open(file_path, 'r', errors='ignore') as file:
-        content = file.read()
+    analysis_result = run_bandit_analysis(file_path)
 
-    patterns = {
-        'AWS_access_key': r'AKIA[0-9A-Z]{16}',
-        'AWS_secret_key': r'(?<![A-Za-z0-9])[A-Za-z0-9/+=]{40}(?![A-Za-z0-9/+=])',
-        'API_key': r'[A-Za-z0-9]{32,}'
-    }
-
-    findings = {key: re.findall(pattern, content) for key, pattern in patterns.items()}
-    return {k: v for k, v in findings.items() if v}
-
-def check_file_permissions(file_path):
-    permissions = os.stat(file_path).st_mode
-    return {
-        'readable_by_others': bool(permissions & 0o004),
-        'writable_by_others': bool(permissions & 0o002)
-    }
+    print("Analysis Results:")
+    for issue in analysis_result:
+        print(f"File: {issue['filename']}")
+        print(f"Line: {issue['line_number']}")
+        print(f"Issue: {issue['issue_text']}")
+        print(f"Severity: {issue['severity']}")
+        print(f"Confidence: {issue['confidence']}")
+        print(f"More Info: {issue['more_info']}")
+        print("-" * 40)
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    main()
