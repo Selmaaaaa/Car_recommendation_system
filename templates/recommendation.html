@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <title>Your Car Recommendation</title>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <!-- Font Awesome icons (free version)-->
+    <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
+    <!-- Google fonts-->
+    <link href="https://fonts.googleapis.com/css?family=Catamaran:100,200,300,400,500,600,700,800,900" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css?family=Lato:100,100i,300,300i,400,400i,700,700i,900,900i" rel="stylesheet" />
+    <!-- Core theme CSS (includes Bootstrap)-->
+    <link href="/css/styles.css" rel="stylesheet" />
+    <style>
+        body {
+            font-family: 'Lato', sans-serif;
+            background-color: #f8f9fa;
+        }
+        .masthead {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding-bottom: 0;
+            background-color: #6f456e;
+            color: white;
+        }
+        .results-container {
+            padding: 3em;
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 800px;
+            margin-top: 3em;
+        }
+        .results-container h2 {
+            margin-bottom: 1.5em;
+            font-size: 1.5rem;
+            text-align: center;
+            color: #333;
+        }
+        .car-card {
+            background-color: #f4f4f4;
+            padding: 1.5em;
+            border-radius: 10px;
+            margin-bottom: 2em;
+            box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.05);
+        }
+        .car-card h3 {
+            font-size: 1.3rem;
+            margin-bottom: 1em;
+            color: #333;
+        }
+        .car-card p {
+            font-size: 1.1rem;
+            margin-bottom: 1em;
+            color: #555;
+        }
+        .car-card ul {
+            list-style-type: none;
+            padding: 0;
+            margin-bottom: 1em;
+        }
+        .car-card ul li {
+            margin-bottom: 0.5em;
+            color: #555;
+        }
+        .back-button {
+            padding: 1em;
+            font-size: 1.2rem;
+            background-color: #6f456e;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: center;
+            transition: background-color 0.3s ease;
+            display: inline-block;
+            text-decoration: none;
+        }
+        .back-button:hover {
+            background-color: #5b3d5b;
+        }
+        footer {
+            background-color: #333;
+            color: white;
+            padding: 1em 0;
+        }
+    </style>
+</head>
+<body id="page-top">
+    <!-- Navigation-->
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-custom fixed-top">
+        <div class="container px-5">
+            <a class="navbar-brand" href="#page-top">Car Recommendation System</a>
+        </div>
+    </nav>
+
+    <!-- Header-->
+    <header class="masthead text-center text-white">
+        <div class="masthead-content">
+            <div class="container px-5 d-flex flex-column align-items-center">
+                <h1>Your Car Recommendation</h1>
+                <div class="results-container">
+                    <h2>We found some great options for you!</h2>
+                    {% if recommended_cars %}
+                        <div class="car-card">
+                            <h3>Recommended Car #1: {{ recommended_cars[0].name }}</h3>
+                            <p><strong>Fuel Type:</strong> {{ recommended_cars[0].fuel_type }}</p>
+                            <p><strong>Price:</strong> ${{ recommended_cars[0].price }}</p>
+                            <p><strong>Performance:</strong> {{ recommended_cars[0].performance }}</p>
+                            <p><strong>Fuel Efficiency:</strong> {{ recommended_cars[0].fuel_efficiency }} MPG</p>
+                            <ul>
+                                <li><strong>Features:</strong></li>
+                                {% for feature in recommended_cars[0].features %}
+                                    <li>{{ feature }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        {% if recommended_cars|length > 1 %}
+                            <div class="car-card">
+                                <h3>Recommended Car #2: {{ recommended_cars[1].name }}</h3>
+                                <p><strong>Fuel Type:</strong> {{ recommended_cars[1].fuel_type }}</p>
+                                <p><strong>Price:</strong> ${{ recommended_cars[1].price }}</p>
+                                <p><strong>Performance:</strong> {{ recommended_cars[1].performance }}</p>
+                                <p><strong>Fuel Efficiency:</strong> {{ recommended_cars[1].fuel_efficiency }} MPG</p>
+                                <ul>
+                                    <li><strong>Features:</strong></li>
+                                    {% for feature in recommended_cars[1].features %}
+                                        <li>{{ feature }}</li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        {% endif %}
+                    {% else %}
+                        <p>No recommendations found based on your criteria.</p>
+                    {% endif %}
+                    <a href="{{ url_for('index') }}" class="back-button">Back to Form</a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Footer-->
+    <footer>
+        <div class="container px-5">
+            <p class="m-0 text-center text-white small">Copyright &copy; Car Recommendation 2024</p>
+        </div>
+    </footer>
+
+    <!-- Bootstrap core JS-->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

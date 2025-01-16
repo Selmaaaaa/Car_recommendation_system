@@ -1,0 +1,21 @@
+Year,Make,Model,Body_Styles,Price,Fuel_Type,Seating,Mileage,Features,Horsepower
+2020,Acura,ILX,Sedan,25000,Petrol,5,30 MPG,"['ABS', 'Airbags']",200
+2021,Toyota,Camry,Sedan,24000,Petrol,5,29 MPG,"['ABS', 'Airbags', 'Cruise Control']",180
+2022,Tesla,Model 3,Sedan,39999,Electric,5,350 miles,"['Autopilot', 'Airbags', 'Cruise Control']",450
+2020,Ford,Explorer,SUV,35000,Petrol,7,24 MPG,"['4WD', 'Airbags', 'Cruise Control']",250
+2021,Honda,Civic,Sedan,22000,Petrol,5,32 MPG,"['ABS', 'Airbags', 'Eco Mode']",180
+2023,Chevrolet,Malibu,Sedan,23000,Petrol,5,27 MPG,"['ABS', 'Traction Control']",190
+2022,BMW,3 Series,Sedan,41000,Petrol,5,35 MPG,"['Airbags', 'Lane Assist']",300
+2020,Audi,A4,Sedan,42000,Petrol,5,33 MPG,"['Airbags', 'Bluetooth']",250
+2021,Mercedes,C-Class,Sedan,43000,Petrol,5,34 MPG,"['ABS', 'Airbags', 'Blind Spot Monitoring']",280
+2023,Hyundai,Elantra,Sedan,20000,Petrol,5,37 MPG,"['Airbags', 'Cruise Control']",160
+2021,Kia,Sportage,SUV,25000,Petrol,5,25 MPG,"['ABS', 'Airbags', 'Eco Mode']",200
+2022,Volkswagen,Jetta,Sedan,21000,Petrol,5,30 MPG,"['Airbags', 'Parking Assist']",220
+2020,Nissan,Altima,Sedan,24000,Petrol,5,28 MPG,"['ABS', 'Cruise Control']",180
+2022,Subaru,Outback,SUV,28000,Petrol,5,31 MPG,"['All Wheel Drive', 'Airbags']",250
+2023,Mazda,CX-5,SUV,30000,Petrol,5,29 MPG,"['ABS', 'Airbags', 'Bluetooth']",230
+2021,Jeep,Wrangler,SUV,34000,Petrol,7,22 MPG,"['Off-Road Capabilities', 'Airbags']",300
+2020,Volvo,XC90,SUV,50000,Petrol,7,26 MPG,"['ABS', 'Luxury Features']",350
+2022,Porsche,Cayenne,SUV,68000,Petrol,5,21 MPG,"['Sport Features', 'Airbags']",400
+2023,Jaguar,F-Pace,SUV,65000,Petrol,5,20 MPG,"['Premium Sound System', 'Airbags']",380
+2021,Lexus,RX 350,SUV,45000,Petrol,5,23 MPG,"['Luxury Features', 'Airbags']",280
